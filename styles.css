@@ -48,13 +48,22 @@ main { padding: 12px 12px 24px; max-width: 720px; margin: 0 auto; }
   flex: 1;
   border: 0;
   background: none;
-  padding: 14px 4px;
-  font-size: 15px;
-  font-weight: 600;
+  padding: 16px 4px 12px;
+  font-size: 17px;
+  font-weight: 700;
   color: var(--muted);
   cursor: pointer;
 }
 .tabbar button.active { color: var(--accent); font-weight: 800; }
+.tabbar button.active::after {
+  content: "";
+  display: block;
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--accent);
+  margin: 5px auto 0;
+}
 @media (max-width: 767px) {
   main { padding-bottom: 96px; }
 }
