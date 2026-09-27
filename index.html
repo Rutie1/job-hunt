@@ -17,6 +17,11 @@
   <!-- 岗位 -->
   <section id="tab-jobs" class="tab-panel active">
     <div class="filters">
+      <select id="filter-kind" aria-label="岗位类型">
+        <option value="">全部岗位</option>
+        <option value="industry">业界</option>
+        <option value="faculty">教职</option>
+      </select>
       <select id="filter-region" aria-label="地区筛选">
         <option value="">全部地区</option>
         <option value="ny_metro">纽约大都会</option>
@@ -29,6 +34,7 @@
         <option value="risk">风险</option>
         <option value="data">数据 / 数科</option>
         <option value="economist">经济学家</option>
+        <option value="faculty">教职</option>
         <option value="other">其他</option>
       </select>
       <button id="jobs-refresh" class="btn small">刷新</button>
