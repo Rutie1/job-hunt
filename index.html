@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>求职助手</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=20260927c">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -17,29 +17,24 @@
   <!-- 岗位 -->
   <section id="tab-jobs" class="tab-panel active">
     <div class="filters">
-      <select id="filter-kind" aria-label="岗位类型">
-        <option value="">全部岗位</option>
-        <option value="industry">业界</option>
-        <option value="faculty">教职</option>
-      </select>
       <select id="filter-region" aria-label="地区筛选">
         <option value="">全部地区</option>
         <option value="ny_metro">纽约大都会</option>
         <option value="nc">北卡</option>
         <option value="other_us">美国其他</option>
       </select>
-      <select id="filter-category" aria-label="类别筛选">
-        <option value="">全部类别</option>
-        <option value="quant">量化</option>
-        <option value="risk">风险</option>
-        <option value="data">数据 / 数科</option>
-        <option value="economist">经济学家</option>
-        <option value="faculty">教职</option>
-        <option value="other">其他</option>
-      </select>
-      <button id="jobs-refresh" class="btn small">刷新</button>
+      <button id="jobs-refresh" class="btn small">重新加载</button>
     </div>
-    <div id="jobs-list" class="cards"></div>
+    <div class="jobs-cols">
+      <div class="jobs-col">
+        <h2 class="col-title">业界</h2>
+        <div id="jobs-industry" class="cards"></div>
+      </div>
+      <div class="jobs-col">
+        <h2 class="col-title">教职</h2>
+        <div id="jobs-faculty" class="cards"></div>
+      </div>
+    </div>
   </section>
 
   <!-- 求职计划 -->
@@ -120,6 +115,6 @@
 </nav>
 
 <div id="toast" class="toast"></div>
-<script src="app.js"></script>
+<script src="app.js?v=20260927c"></script>
 </body>
 </html>
