@@ -16,6 +16,24 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
     .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+// minimal markdown -> html for the .html resume download
+function mdToHtml(md) {
+  var lines = String(md).split('\n'), html = '', inList = false;
+  function inline(t) {
+    return esc(t).replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  }
+  lines.forEach(function (ln) {
+    var line = ln.trim();
+    if (/^---+$/.test(line)) { if (inList) { html += '</ul>'; inList = false; } html += '<hr>'; return; }
+    var h = line.match(/^(#{1,3})\s+(.*)$/);
+    if (h) { if (inList) { html += '</ul>'; inList = false; } html += '<h' + h[1].length + '>' + inline(h[2]) + '</h' + h[1].length + '>'; return; }
+    if (/^[-*]\s+/.test(line)) { if (!inList) { html += '<ul>'; inList = true; } html += '<li>' + inline(line.replace(/^[-*]\s+/, '')) + '</li>'; return; }
+    if (inList) { html += '</ul>'; inList = false; }
+    if (line) html += '<p>' + inline(line) + '</p>';
+  });
+  if (inList) html += '</ul>';
+  return html;
+}
 function toast(msg) {
   var t = document.getElementById('toast');
   t.textContent = msg;
@@ -453,17 +471,36 @@ async function loadResumeResults() {
         '<div class="meta">' + esc(fmtDateTime(x.created_at)) + '</div>' +
         (x.analysis ? '<div class="match"><b>匹配分析</b><pre class="note-content">' + esc(x.analysis) + '</pre></div>' : '') +
         (x.tailored_resume ? '<details><summary>查看定制版简历全文</summary><pre class="note-content">' + esc(x.tailored_resume) + '</pre></details>' : '') +
-        (x.tailored_resume ? '<div class="actions"><button class="btn small" data-dl="' + esc(x.id) + '">下载定制简历 (.md)</button></div>' : '') +
+        (x.tailored_resume ? '<div class="actions">' +
+          '<button class="btn small" data-dl="' + esc(x.id) + '" data-fmt="md">下载 .md</button> ' +
+          '<button class="btn small" data-dl="' + esc(x.id) + '" data-fmt="txt">下载 .txt</button> ' +
+          '<button class="btn small" data-dl="' + esc(x.id) + '" data-fmt="html">下载 .html</button></div>' : '') +
       '</div>';
     }).join('');
     box.querySelectorAll('[data-dl]').forEach(function (b) {
       b.addEventListener('click', function () {
         var x = RESULT_CACHE[b.dataset.dl];
         if (!x || !x.tailored_resume) return;
-        var blob = new Blob([x.tailored_resume], { type: 'text/markdown;charset=utf-8' });
+        var fmt = b.dataset.fmt || 'md';
+        var base = ('resume_' + (x.company || 'custom')).replace(/\s+/g, '_');
+        var content, type, ext;
+        if (fmt === 'html') {
+          content = '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' +
+            esc(x.company || 'Resume') + ' - Tailored Resume</title><style>body{font-family:-apple-system,Helvetica,Arial,sans-serif;max-width:720px;margin:24px auto;padding:0 16px;line-height:1.6;color:#1c1e21}h1{font-size:22px;border-bottom:2px solid #1c1e21;padding-bottom:6px}h2{font-size:17px;margin-top:22px;color:#0a66c2}ul{padding-left:20px}li{margin:6px 0}hr{border:0;border-top:1px solid #ddd;margin:18px 0}.note{background:#fff8e1;border:1px solid #f0d060;border-radius:8px;padding:10px 12px;font-size:13px;margin-top:24px}</style></head><body>' +
+            mdToHtml(x.tailored_resume) +
+            '<div class="note">Tailored resume generated for ' + esc(x.company || '') + ' — ' + esc(x.job_title || '') + '. All facts are from the original resume; nothing has been invented.</div></body></html>';
+          type = 'text/html;charset=utf-8'; ext = '.html';
+        } else if (fmt === 'txt') {
+          content = x.tailored_resume.replace(/^#{1,3}\s+/gm, '').replace(/\*\*/g, '');
+          type = 'text/plain;charset=utf-8'; ext = '.txt';
+        } else {
+          content = x.tailored_resume;
+          type = 'text/markdown;charset=utf-8'; ext = '.md';
+        }
+        var blob = new Blob([content], { type: type });
         var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = ('resume_' + (x.company || 'custom')).replace(/\s+/g, '_') + '.md';
+        a.download = base + ext;
         document.body.appendChild(a);
         a.click();
         setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
