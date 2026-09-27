@@ -5,6 +5,7 @@ var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 var REGION_LABEL = { ny_metro: '纽约大都会', nc: '北卡', other_us: '美国其他' };
 var CATEGORY_LABEL = { quant: '量化', risk: '风险', data: '数据 / 数科', economist: '经济学家', faculty: '教职', other: '其他' };
+var SPONSOR_LABEL = { sponsor: '办签证 Sponsor', verified: '有H-1B记录', no: '不办签证' };
 var APP_STATUS = {
   interested: '感兴趣', applied: '已投递', oa: '笔试 OA',
   interview: '面试中', offer: '已拿 offer', rejected: '被拒', withdrawn: '撤回'
@@ -81,6 +82,7 @@ function jobCard(j) {
     '<div style="margin-top:6px;">' +
       (j.region ? '<span class="tag region-' + esc(j.region) + '">' + esc(REGION_LABEL[j.region] || j.region) + '</span>' : '') +
       (j.category && j.category !== 'faculty' ? '<span class="tag">' + esc(CATEGORY_LABEL[j.category] || j.category) + '</span>' : '') +
+      (j.sponsorship ? '<span class="tag sp-' + esc(j.sponsorship) + '">' + esc(SPONSOR_LABEL[j.sponsorship] || j.sponsorship) + '</span>' : '') +
     '</div>' +
     (j.match_note ? '<div class="match">' + esc(j.match_note) + '</div>' : '') +
     '<div class="actions">' +
