@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>求职助手</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="topbar">
+  <h1>求职助手</h1>
+  <p class="subtitle">岗位每天 9:00 / 17:00 自动更新</p>
+</header>
+
+<main id="app">
+  <!-- 岗位 -->
+  <section id="tab-jobs" class="tab-panel active">
+    <div class="filters">
+      <select id="filter-region" aria-label="地区筛选">
+        <option value="">全部地区</option>
+        <option value="ny_metro">纽约大都会</option>
+        <option value="nc">北卡</option>
+        <option value="other_us">美国其他</option>
+      </select>
+      <select id="filter-category" aria-label="类别筛选">
+        <option value="">全部类别</option>
+        <option value="quant">量化</option>
+        <option value="risk">风险</option>
+        <option value="data">数据 / 数科</option>
+        <option value="economist">经济学家</option>
+        <option value="other">其他</option>
+      </select>
+      <button id="jobs-refresh" class="btn small">刷新</button>
+    </div>
+    <div id="jobs-list" class="cards"></div>
+  </section>
+
+  <!-- 求职计划 -->
+  <section id="tab-plan" class="tab-panel">
+    <div class="toolbar">
+      <button id="plan-refresh" class="btn small">刷新</button>
+    </div>
+    <div id="plan-list"></div>
+  </section>
+
+  <!-- 投递管理 -->
+  <section id="tab-apps" class="tab-panel">
+    <form id="app-form" class="form-card">
+      <h3>新增投递</h3>
+      <input name="company" placeholder="公司 *" required>
+      <input name="title" placeholder="岗位名称 *" required>
+      <input name="location" placeholder="地点">
+      <input name="url" placeholder="岗位链接 (https://…)" inputmode="url">
+      <textarea name="notes" placeholder="备注" rows="2"></textarea>
+      <button type="submit" class="btn primary">添加</button>
+    </form>
+    <div class="toolbar">
+      <select id="apps-status-filter" aria-label="状态筛选">
+        <option value="">全部状态</option>
+        <option value="interested">感兴趣</option>
+        <option value="applied">已投递</option>
+        <option value="oa">笔试 OA</option>
+        <option value="interview">面试中</option>
+        <option value="offer">已拿 offer</option>
+        <option value="rejected">被拒</option>
+        <option value="withdrawn">撤回</option>
+      </select>
+      <button id="apps-refresh" class="btn small">刷新</button>
+    </div>
+    <div id="apps-list" class="cards"></div>
+  </section>
+
+  <!-- 面试记录 -->
+  <section id="tab-interviews" class="tab-panel">
+    <form id="iv-form" class="form-card">
+      <h3>新增面试记录</h3>
+      <input name="company" placeholder="公司 *" required>
+      <input name="round_desc" placeholder="轮次说明，如：一面 / HR面 / Onsite">
+      <input name="interview_at" type="datetime-local">
+      <input name="format" placeholder="形式，如：视频 / 电话 / 现场">
+      <select name="application_id" id="iv-app-select">
+        <option value="">关联投递（可选）</option>
+      </select>
+      <textarea name="notes" placeholder="面试过程记录" rows="3"></textarea>
+      <textarea name="feedback" placeholder="自我反馈 / 复盘" rows="2"></textarea>
+      <textarea name="follow_up" placeholder="后续跟进（如：感谢信、下一轮准备）" rows="2"></textarea>
+      <button type="submit" class="btn primary">保存</button>
+    </form>
+    <div class="toolbar"><button id="iv-refresh" class="btn small">刷新</button></div>
+    <div id="iv-list" class="cards"></div>
+  </section>
+
+  <!-- 简历 -->
+  <section id="tab-resume" class="tab-panel">
+    <div class="notice">简历原文不存放在这里，只记录版本要点和改进意见。如需针对某个岗位定制简历，把 JD 发给风火轮即可。</div>
+    <form id="resume-form" class="form-card">
+      <h3>新增记录</h3>
+      <input name="title" placeholder="标题，如：通用版 v3 / 针对 Citadel JD 的调整 *" required>
+      <textarea name="content" placeholder="要点记录…" rows="5"></textarea>
+      <button type="submit" class="btn primary">保存</button>
+    </form>
+    <div class="toolbar"><button id="resume-refresh" class="btn small">刷新</button></div>
+    <div id="resume-list" class="cards"></div>
+  </section>
+</main>
+
+<nav class="tabbar">
+  <button data-tab="tab-jobs" class="active">岗位</button>
+  <button data-tab="tab-plan">求职计划</button>
+  <button data-tab="tab-apps">投递管理</button>
+  <button data-tab="tab-interviews">面试记录</button>
+  <button data-tab="tab-resume">简历</button>
+</nav>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
