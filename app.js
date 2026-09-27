@@ -68,6 +68,7 @@ function jobCard(j) {
     '<div class="actions">' +
       (j.url ? '<a class="link-btn" href="' + esc(j.url) + '" target="_blank" rel="noopener">查看详情 / 申请</a>' : '') +
       '<button class="btn small" data-add-app="' + esc(j.id) + '">加入投递</button>' +
+      '<button class="btn small" data-match-job="' + esc(j.id) + '">简历匹配</button>' +
     '</div>' +
   '</div>';
 }
@@ -90,6 +91,9 @@ async function loadJobs() {
     [boxI, boxF].forEach(function (box) {
       box.querySelectorAll('[data-add-app]').forEach(function (b) {
         b.addEventListener('click', function () { addAppFromJob(b.dataset.addApp); });
+      });
+      box.querySelectorAll('[data-match-job]').forEach(function (b) {
+        b.addEventListener('click', function () { requestMatch(b.dataset.matchJob); });
       });
     });
   } catch (e) {
@@ -312,80 +316,174 @@ document.getElementById('iv-form').addEventListener('submit', async function (ev
 });
 document.getElementById('iv-refresh').addEventListener('click', loadInterviews);
 
-/* ================= 简历 ================= */
-async function loadResumeNotes() {
-  var box = document.getElementById('resume-list');
-  box.innerHTML = loadingHTML();
-  try {
-    var res = await sb.from('resume_notes').select('*').order('created_at', { ascending: false }).limit(100);
-    if (res.error) throw res.error;
-    var rows = res.data || [];
-    if (!rows.length) {
-      box.innerHTML = emptyHTML('还没有简历记录。');
-      return;
+/* ================= 简历模块 ================= */
+var RESULT_CACHE = {};
+
+function switchTab(id) {
+  document.querySelectorAll('.tabbar button').forEach(function (b) {
+    b.classList.toggle('active', b.dataset.tab === id);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function (p) {
+    p.classList.toggle('active', p.id === id);
+  });
+  window.scrollTo(0, 0);
+}
+
+async function extractTextFromFile(file) {
+  var name = (file.name || '').toLowerCase();
+  if (name.endsWith('.pdf')) {
+    if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
-    box.innerHTML = rows.map(function (n) {
-      return '<div class="card" data-note="' + esc(n.id) + '">' +
-        '<h3>' + esc(n.title) + '</h3>' +
-        '<div class="meta">' + esc(fmtDateTime(n.created_at)) + '</div>' +
-        (n.content ? '<pre class="note-content">' + esc(n.content) + '</pre>' : '') +
-        '<div class="status-line">' +
-          '<button class="mini-btn" style="color:#2456d6;" data-note-edit="' + esc(n.id) + '">编辑</button>' +
-          '<button class="mini-btn" data-note-del="' + esc(n.id) + '">删除</button>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-    box.querySelectorAll('[data-note-del]').forEach(function (b) {
-      b.addEventListener('click', async function () {
-        if (!confirm('确定删除这条记录吗？')) return;
-        var r = await sb.from('resume_notes').delete().eq('id', b.dataset.noteDel);
-        if (r.error) toast('删除失败：' + r.error.message);
-        else { toast('已删除'); loadResumeNotes(); }
+    var buf = await file.arrayBuffer();
+    var pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    var parts = [];
+    for (var i = 1; i <= pdf.numPages; i++) {
+      var page = await pdf.getPage(i);
+      var tc = await page.getTextContent();
+      parts.push(tc.items.map(function (it) { return it.str; }).join(' '));
+    }
+    return parts.join('\n');
+  }
+  if (name.endsWith('.docx')) {
+    var buf2 = await file.arrayBuffer();
+    var res = await mammoth.extractRawText({ arrayBuffer: buf2 });
+    return res.value;
+  }
+  return await file.text();
+}
+
+async function loadResumeMaster() {
+  var box = document.getElementById('resume-master');
+  try {
+    var r = await sb.from('resumes').select('id,title,file_name,content_text,created_at').eq('is_master', true).order('created_at', { ascending: false }).limit(1);
+    if (r.error) throw r.error;
+    if (!r.data.length) { box.innerHTML = '<div class="hint">还没有上传简历。</div>'; return; }
+    var m = r.data[0];
+    var words = m.content_text.trim().split(/\s+/).length;
+    box.innerHTML = '<div class="card"><h3>' + esc(m.title) + '</h3>' +
+      '<div class="meta">' + esc(m.file_name || '') + ' · 约 ' + words + ' 词 · ' + esc(fmtDateTime(m.created_at)) + '</div>' +
+      '<pre class="note-content">' + esc(m.content_text.slice(0, 600)) + (m.content_text.length > 600 ? '\n…' : '') + '</pre></div>';
+  } catch (e) { box.innerHTML = emptyHTML('加载失败：' + e.message); }
+}
+
+async function loadMaterials() {
+  var box = document.getElementById('material-list');
+  try {
+    var r = await sb.from('materials').select('*').order('created_at', { ascending: false }).limit(50);
+    if (r.error) throw r.error;
+    var rows = r.data || [];
+    document.getElementById('material-update-btn').style.display = rows.length ? '' : 'none';
+    box.innerHTML = rows.length ? rows.map(function (m) {
+      return '<label class="mat-row"><input type="checkbox" data-mat="' + esc(m.id) + '"> ' +
+        '<span class="grow"><b>' + esc(m.title) + '</b> <span class="meta">' + esc(fmtDate(m.created_at)) + '</span></span>' +
+        '<button class="mini-btn" data-mat-del="' + esc(m.id) + '">删除</button></label>';
+    }).join('') : '<div class="hint">还没有辅助材料。</div>';
+    box.querySelectorAll('[data-mat-del]').forEach(function (b) {
+      b.addEventListener('click', async function (ev) {
+        ev.preventDefault();
+        if (!confirm('删除这份材料？')) return;
+        var del = await sb.from('materials').delete().eq('id', b.dataset.matDel);
+        if (del.error) toast('删除失败：' + del.error.message);
+        else { toast('已删除'); loadMaterials(); }
       });
     });
-    box.querySelectorAll('[data-note-edit]').forEach(function (b) {
-      b.addEventListener('click', function () { editResumeNote(b.dataset.noteEdit); });
+  } catch (e) { box.innerHTML = emptyHTML('加载失败：' + e.message); }
+}
+
+async function handleUpload(file, kind) {
+  toast('正在解析…');
+  try {
+    var text = await extractTextFromFile(file);
+    if (!text.trim()) { toast('没解析出文字，换一份试试'); return; }
+    var name = prompt(kind === 'resume' ? '给这份简历起个名字：' : '给这份材料起个名字：', file.name.replace(/\.[^.]+$/, ''));
+    if (name === null) return;
+    if (kind === 'resume') {
+      await sb.from('resumes').update({ is_master: false }).eq('is_master', true);
+      var ins = await sb.from('resumes').insert({ title: (name || '主简历'), file_name: file.name, content_text: text, is_master: true });
+      if (ins.error) throw ins.error;
+      toast('简历已上传');
+      loadResumeMaster();
+    } else {
+      var ins2 = await sb.from('materials').insert({ title: (name || file.name), file_name: file.name, content_text: text });
+      if (ins2.error) throw ins2.error;
+      toast('材料已上传');
+      loadMaterials();
+    }
+  } catch (e) { toast('失败：' + e.message); }
+}
+
+async function requestMatch(jobId) {
+  try {
+    var r = await sb.from('resumes').select('id').eq('is_master', true).limit(1);
+    if (r.error) throw r.error;
+    if (!r.data.length) { toast('请先在"简历"页上传简历'); switchTab('tab-resume'); return; }
+    var ins = await sb.from('resume_requests').insert({ type: 'match', resume_id: r.data[0].id, job_id: jobId, status: 'pending' });
+    if (ins.error) throw ins.error;
+    toast('已提交，约 20 分钟后在"简历"页查看结果');
+  } catch (e) { toast('提交失败：' + e.message); }
+}
+
+async function loadResumeResults() {
+  var box = document.getElementById('resume-results');
+  box.innerHTML = loadingHTML();
+  try {
+    var r = await sb.from('resume_results').select('*').order('created_at', { ascending: false }).limit(50);
+    if (r.error) throw r.error;
+    var rows = r.data || [];
+    if (!rows.length) { box.innerHTML = emptyHTML('还没有匹配结果。在"岗位"页点任意岗位的"简历匹配"即可。'); return; }
+    rows.forEach(function (x) { RESULT_CACHE[x.id] = x; });
+    box.innerHTML = rows.map(function (x) {
+      var head = x.job_title ? ('针对 ' + x.company + ' · ' + x.job_title) : '简历更新版';
+      return '<div class="card"><h3>' + esc(head) + '</h3>' +
+        '<div class="meta">' + esc(fmtDateTime(x.created_at)) + '</div>' +
+        (x.analysis ? '<div class="match"><b>匹配分析</b><pre class="note-content">' + esc(x.analysis) + '</pre></div>' : '') +
+        (x.tailored_resume ? '<details><summary>查看定制版简历全文</summary><pre class="note-content">' + esc(x.tailored_resume) + '</pre></details>' : '') +
+        (x.tailored_resume ? '<div class="actions"><button class="btn small" data-dl="' + esc(x.id) + '">下载定制简历 (.md)</button></div>' : '') +
+      '</div>';
+    }).join('');
+    box.querySelectorAll('[data-dl]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var x = RESULT_CACHE[b.dataset.dl];
+        if (!x || !x.tailored_resume) return;
+        var blob = new Blob([x.tailored_resume], { type: 'text/markdown;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = ('resume_' + (x.company || 'custom')).replace(/\s+/g, '_') + '.md';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+      });
     });
-  } catch (e) {
-    box.innerHTML = emptyHTML('加载失败：' + e.message);
-  }
+  } catch (e) { box.innerHTML = emptyHTML('加载失败：' + e.message); }
 }
-async function editResumeNote(id) {
-  var card = document.querySelector('[data-note="' + id + '"]');
-  if (!card || card.querySelector('.edit-area')) return;
-  var titleEl = card.querySelector('h3');
-  var pre = card.querySelector('.note-content');
-  var area = document.createElement('div');
-  area.className = 'edit-area';
-  area.innerHTML =
-    '<input id="edit-title-' + id + '" value="' + esc(titleEl.textContent) + '">' +
-    '<textarea id="edit-content-' + id + '" rows="5">' + esc(pre ? pre.textContent : '') + '</textarea>' +
-    '<div class="status-line"><button class="btn small primary" id="edit-save-' + id + '">保存</button>' +
-    '<button class="btn small" id="edit-cancel-' + id + '">取消</button></div>';
-  card.appendChild(area);
-  document.getElementById('edit-cancel-' + id).addEventListener('click', function () { area.remove(); });
-  document.getElementById('edit-save-' + id).addEventListener('click', async function () {
-    var r = await sb.from('resume_notes').update({
-      title: document.getElementById('edit-title-' + id).value.trim(),
-      content: document.getElementById('edit-content-' + id).value.trim() || null
-    }).eq('id', id);
-    if (r.error) toast('保存失败：' + r.error.message);
-    else { toast('已保存'); loadResumeNotes(); }
-  });
-}
-document.getElementById('resume-form').addEventListener('submit', async function (ev) {
-  ev.preventDefault();
-  var fd = new FormData(ev.target);
-  var payload = {
-    title: (fd.get('title') || '').trim(),
-    content: (fd.get('content') || '').trim() || null
-  };
-  if (!payload.title) { toast('请填写标题'); return; }
-  var r = await sb.from('resume_notes').insert(payload);
-  if (r.error) toast('保存失败：' + r.error.message);
-  else { toast('已保存'); ev.target.reset(); loadResumeNotes(); }
+
+document.getElementById('resume-upload').addEventListener('change', function (ev) {
+  var f = ev.target.files[0];
+  ev.target.value = '';
+  if (f) handleUpload(f, 'resume');
 });
-document.getElementById('resume-refresh').addEventListener('click', loadResumeNotes);
+document.getElementById('material-upload').addEventListener('change', function (ev) {
+  var f = ev.target.files[0];
+  ev.target.value = '';
+  if (f) handleUpload(f, 'material');
+});
+document.getElementById('material-update-btn').addEventListener('click', async function () {
+  var ids = Array.prototype.map.call(document.querySelectorAll('[data-mat]:checked'), function (c) { return c.dataset.mat; });
+  if (!ids.length) { toast('请先勾选材料'); return; }
+  try {
+    var r = await sb.from('resumes').select('id').eq('is_master', true).limit(1);
+    if (r.error) throw r.error;
+    if (!r.data.length) { toast('请先上传简历'); return; }
+    var ins = await sb.from('resume_requests').insert({ type: 'update', resume_id: r.data[0].id, material_ids: ids, status: 'pending' });
+    if (ins.error) throw ins.error;
+    toast('已提交，约 20 分钟后生成新版简历');
+  } catch (e) { toast('提交失败：' + e.message); }
+});
+document.getElementById('resume-refresh').addEventListener('click', function () {
+  loadResumeMaster(); loadMaterials(); loadResumeResults();
+});
+
 
 /* ---------- 初始化 ---------- */
 loadJobs();
@@ -393,4 +491,6 @@ loadPlan();
 loadApps();
 loadAppOptions();
 loadInterviews();
-loadResumeNotes();
+loadResumeMaster();
+loadMaterials();
+loadResumeResults();
