@@ -53,48 +53,48 @@ document.querySelectorAll('.tabbar button').forEach(function (btn) {
   });
 });
 
-/* ================= 岗位 ================= */
+/* ================= 岗位（业界 / 教职双列） ================= */
+function jobCard(j) {
+  return '<div class="card">' +
+    '<h3>' + esc(j.title) + '</h3>' +
+    '<div class="meta">' + esc(j.company || '') +
+      (j.location ? ' · ' + esc(j.location) : '') +
+      (j.posted_text ? ' · 发布于 ' + esc(j.posted_text) : '') + '</div>' +
+    '<div style="margin-top:6px;">' +
+      (j.region ? '<span class="tag region-' + esc(j.region) + '">' + esc(REGION_LABEL[j.region] || j.region) + '</span>' : '') +
+      (j.category && j.category !== 'faculty' ? '<span class="tag">' + esc(CATEGORY_LABEL[j.category] || j.category) + '</span>' : '') +
+    '</div>' +
+    (j.match_note ? '<div class="match">' + esc(j.match_note) + '</div>' : '') +
+    '<div class="actions">' +
+      (j.url ? '<a class="link-btn" href="' + esc(j.url) + '" target="_blank" rel="noopener">查看详情 / 申请</a>' : '') +
+      '<button class="btn small" data-add-app="' + esc(j.id) + '">加入投递</button>' +
+    '</div>' +
+  '</div>';
+}
 async function loadJobs() {
-  var box = document.getElementById('jobs-list');
-  box.innerHTML = loadingHTML();
+  var boxI = document.getElementById('jobs-industry');
+  var boxF = document.getElementById('jobs-faculty');
+  boxI.innerHTML = loadingHTML();
+  boxF.innerHTML = loadingHTML();
   var region = document.getElementById('filter-region').value;
-  var category = document.getElementById('filter-category').value;
-  var kind = document.getElementById('filter-kind').value;
   try {
     var q = sb.from('jobs').select('*').eq('is_active', true).order('discovered_at', { ascending: false }).limit(200);
     if (region) q = q.eq('region', region);
-    if (category) q = q.eq('category', category);
-    if (kind === 'industry') q = q.neq('category', 'faculty');
-    if (kind === 'faculty') q = q.eq('category', 'faculty');
     var res = await q;
     if (res.error) throw res.error;
     var rows = res.data || [];
-    if (!rows.length) {
-      box.innerHTML = emptyHTML('暂无岗位，下一轮自动更新（每天 9:00 / 17:00）后会显示在这里。');
-      return;
-    }
-    box.innerHTML = rows.map(function (j) {
-      return '<div class="card">' +
-        '<h3>' + esc(j.title) + '</h3>' +
-        '<div class="meta">' + esc(j.company || '') +
-          (j.location ? ' · ' + esc(j.location) : '') +
-          (j.posted_text ? ' · ' + esc(j.posted_text) : '') + '</div>' +
-        '<div style="margin-top:6px;">' +
-          (j.region ? '<span class="tag region-' + esc(j.region) + '">' + esc(REGION_LABEL[j.region] || j.region) + '</span>' : '') +
-          (j.category ? '<span class="tag">' + esc(CATEGORY_LABEL[j.category] || j.category) + '</span>' : '') +
-        '</div>' +
-        (j.match_note ? '<div class="match">' + esc(j.match_note) + '</div>' : '') +
-        '<div class="actions">' +
-          (j.url ? '<a class="link-btn" href="' + esc(j.url) + '" target="_blank" rel="noopener">查看详情 / 申请</a>' : '') +
-          '<button class="btn small" data-add-app="' + esc(j.id) + '">加入投递</button>' +
-        '</div>' +
-      '</div>';
-    }).join('');
-    box.querySelectorAll('[data-add-app]').forEach(function (b) {
-      b.addEventListener('click', function () { addAppFromJob(b.dataset.addApp); });
+    var ind = rows.filter(function (j) { return j.category !== 'faculty'; });
+    var fac = rows.filter(function (j) { return j.category === 'faculty'; });
+    boxI.innerHTML = ind.length ? ind.map(jobCard).join('') : emptyHTML('暂无业界岗位，下一轮自动更新（每天 9:00 / 17:00）后会显示在这里。');
+    boxF.innerHTML = fac.length ? fac.map(jobCard).join('') : emptyHTML('暂无教职岗位，下一轮自动更新后会显示在这里。');
+    [boxI, boxF].forEach(function (box) {
+      box.querySelectorAll('[data-add-app]').forEach(function (b) {
+        b.addEventListener('click', function () { addAppFromJob(b.dataset.addApp); });
+      });
     });
   } catch (e) {
-    box.innerHTML = emptyHTML('加载失败：' + e.message);
+    boxI.innerHTML = emptyHTML('加载失败：' + e.message);
+    boxF.innerHTML = '';
   }
 }
 async function addAppFromJob(jobId) {
@@ -114,8 +114,6 @@ async function addAppFromJob(jobId) {
   }
 }
 document.getElementById('filter-region').addEventListener('change', loadJobs);
-document.getElementById('filter-category').addEventListener('change', loadJobs);
-document.getElementById('filter-kind').addEventListener('change', loadJobs);
 document.getElementById('jobs-refresh').addEventListener('click', loadJobs);
 
 /* ================= 求职计划 ================= */
