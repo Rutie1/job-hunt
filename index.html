@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>求职助手</title>
-<link rel="stylesheet" href="styles.css?v=20260927c">
+<link rel="stylesheet" href="styles.css?v=20260927d">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -94,15 +94,25 @@
 
   <!-- 简历 -->
   <section id="tab-resume" class="tab-panel">
-    <div class="notice">简历原文不存放在这里，只记录版本要点和改进意见。如需针对某个岗位定制简历，把 JD 发给风火轮即可。</div>
-    <form id="resume-form" class="form-card">
-      <h3>新增记录</h3>
-      <input name="title" placeholder="标题，如：通用版 v3 / 针对 Citadel JD 的调整 *" required>
-      <textarea name="content" placeholder="要点记录…" rows="5"></textarea>
-      <button type="submit" class="btn primary">保存</button>
-    </form>
-    <div class="toolbar"><button id="resume-refresh" class="btn small">刷新</button></div>
-    <div id="resume-list" class="cards"></div>
+    <div class="resume-block">
+      <h2>我的简历</h2>
+      <p class="hint">上传 PDF / Word / txt，浏览器里直接解析成文字保存，不上传原文件。</p>
+      <label class="btn primary file-btn">上传简历<input type="file" id="resume-upload" accept=".pdf,.docx,.txt,.md" hidden></label>
+      <div id="resume-master" style="margin-top:8px;"></div>
+    </div>
+    <div class="resume-block">
+      <h2>辅助材料</h2>
+      <p class="hint">新的 project、论文更新等传到这里，勾选后可一键更新简历。</p>
+      <label class="btn file-btn">上传材料<input type="file" id="material-upload" accept=".pdf,.docx,.txt,.md" hidden></label>
+      <div id="material-list" style="margin-top:8px;"></div>
+      <button id="material-update-btn" class="btn primary" style="display:none;margin-top:8px;">用选中材料更新简历</button>
+    </div>
+    <div class="resume-block">
+      <h2>匹配结果</h2>
+      <p class="hint">在"岗位"页点任意岗位的"简历匹配"，约 20 分钟后结果显示在这里。</p>
+      <div class="toolbar"><button id="resume-refresh" class="btn small">重新加载</button></div>
+      <div id="resume-results" class="cards"></div>
+    </div>
   </section>
 </main>
 
@@ -115,6 +125,8 @@
 </nav>
 
 <div id="toast" class="toast"></div>
-<script src="app.js?v=20260927c"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="app.js?v=20260927d"></script>
 </body>
 </html>
