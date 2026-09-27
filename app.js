@@ -4,7 +4,7 @@ var SUPABASE_KEY = 'sb_publishable_TjINRMrM7lD8E-BIcaOlRg_-gJznHwL'; // 公开�
 var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 var REGION_LABEL = { ny_metro: '纽约大都会', nc: '北卡', other_us: '美国其他' };
-var CATEGORY_LABEL = { quant: '量化', risk: '风险', data: '数据 / 数科', economist: '经济学家', other: '其他' };
+var CATEGORY_LABEL = { quant: '量化', risk: '风险', data: '数据 / 数科', economist: '经济学家', faculty: '教职', other: '其他' };
 var APP_STATUS = {
   interested: '感兴趣', applied: '已投递', oa: '笔试 OA',
   interview: '面试中', offer: '已拿 offer', rejected: '被拒', withdrawn: '撤回'
@@ -59,10 +59,13 @@ async function loadJobs() {
   box.innerHTML = loadingHTML();
   var region = document.getElementById('filter-region').value;
   var category = document.getElementById('filter-category').value;
+  var kind = document.getElementById('filter-kind').value;
   try {
     var q = sb.from('jobs').select('*').eq('is_active', true).order('discovered_at', { ascending: false }).limit(200);
     if (region) q = q.eq('region', region);
     if (category) q = q.eq('category', category);
+    if (kind === 'industry') q = q.neq('category', 'faculty');
+    if (kind === 'faculty') q = q.eq('category', 'faculty');
     var res = await q;
     if (res.error) throw res.error;
     var rows = res.data || [];
@@ -112,6 +115,7 @@ async function addAppFromJob(jobId) {
 }
 document.getElementById('filter-region').addEventListener('change', loadJobs);
 document.getElementById('filter-category').addEventListener('change', loadJobs);
+document.getElementById('filter-kind').addEventListener('change', loadJobs);
 document.getElementById('jobs-refresh').addEventListener('click', loadJobs);
 
 /* ================= 求职计划 ================= */
