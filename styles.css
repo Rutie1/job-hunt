@@ -48,12 +48,16 @@ main { padding: 12px 12px 24px; max-width: 720px; margin: 0 auto; }
   flex: 1;
   border: 0;
   background: none;
-  padding: 12px 4px;
-  font-size: 13px;
+  padding: 14px 4px;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--muted);
   cursor: pointer;
 }
-.tabbar button.active { color: var(--accent); font-weight: 700; }
+.tabbar button.active { color: var(--accent); font-weight: 800; }
+@media (max-width: 767px) {
+  main { padding-bottom: 96px; }
+}
 
 .filters, .toolbar {
   display: flex;
