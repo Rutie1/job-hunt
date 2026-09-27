@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>求职助手</title>
-<link rel="stylesheet" href="styles.css?v=20260927g">
+<link rel="stylesheet" href="styles.css?v=20260927h">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -25,6 +25,12 @@
       </select>
       <button id="jobs-refresh" class="btn small">重新加载</button>
     </div>
+    <details class="legend">
+      <summary>签证标签说明</summary>
+      <p><span class="tag sp-sponsor">办签证 Sponsor</span> 招聘帖明确写了提供 sponsorship（如 H-1B）。</p>
+      <p><span class="tag sp-verified">有H-1B记录</span> 招聘帖没写，但在 H-1B 公开数据（DOL LCA）里查到该雇主历史上办过 H-1B——代表"办过"，不保证这个岗位一定办，投递前请和 HR 确认。</p>
+      <p><span class="tag sp-no">不办签证</span> 招聘帖明确写了不办，或没写且在公开数据里查不到该雇主的 H-1B 记录。</p>
+    </details>
     <div class="jobs-cols">
       <div class="jobs-col">
         <h2 class="col-title">业界</h2>
@@ -130,6 +136,6 @@
 <div id="toast" class="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="app.js?v=20260927f"></script>
+<script src="app.js?v=20260927g"></script>
 </body>
 </html>
