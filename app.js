@@ -555,3 +555,13 @@ loadInterviews();
 loadResumeMaster();
 loadMaterials();
 loadResumeResults();
+
+// 隐藏彩蛋：点击标题弹出给雪雪的小惊喜（标题外观保持不可点的样子）
+(function () {
+  var t = document.getElementById('easter-egg-title');
+  var ov = document.getElementById('egg-overlay');
+  if (!t || !ov) return;
+  t.addEventListener('click', function () { ov.classList.add('show'); });
+  document.getElementById('egg-close').addEventListener('click', function () { ov.classList.remove('show'); });
+  ov.addEventListener('click', function (e) { if (e.target === ov) ov.classList.remove('show'); });
+})();
