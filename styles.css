@@ -289,3 +289,14 @@ details summary { cursor: pointer; font-size: 14px; color: #2456d6; margin: 8px 
     padding: 20px 28px 48px;
   }
 }
+
+.cabinet { font-size: 12px; color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; margin-bottom: 12px; }
+.cabinet summary { cursor: pointer; font-weight: 700; color: var(--text); font-size: 13px; }
+.cab-note { margin: 8px 0; line-height: 1.7; }
+.cab-lists { display: flex; gap: 16px; }
+.cab-col { flex: 1; min-width: 0; }
+.cab-col h4 { margin: 8px 0 6px; font-size: 13px; color: var(--text); }
+.cab-scroll { max-height: 220px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; background: var(--bg); }
+.cab-g { margin: 0 0 10px; line-height: 1.7; }
+.cab-g strong { color: var(--text); }
+@media (max-width: 640px) { .cab-lists { flex-direction: column; } }
