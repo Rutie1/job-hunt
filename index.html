@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>求职助手</title>
-<link rel="stylesheet" href="styles.css?v=20260927h">
+<link rel="stylesheet" href="styles.css?v=20260927j">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header class="topbar">
-  <h1>求职助手</h1>
+  <h1 id="easter-egg-title">求职助手</h1>
   <p class="subtitle">岗位每天 9:00 / 17:00 自动更新</p>
 </header>
 
@@ -172,8 +172,21 @@
 </nav>
 
 <div id="toast" class="toast"></div>
+
+<!-- 隐藏彩蛋：给雪雪的小惊喜 -->
+<div id="egg-overlay" class="egg-overlay">
+  <div class="egg-card">
+    <div class="egg-emoji">🥚✨</div>
+    <h3>哇哦，被你发现了！</h3>
+    <p>这是铁铁偷偷给雪雪准备的小彩蛋。</p>
+    <p>老婆，我想跟你说：<strong>不管最后能不能找到工作，我都会一如既往地爱你</strong>，一点都不会少。</p>
+    <p>做这个小网站，不是想给你压力，只是想让你的生活轻松一点、方便一点。慢慢来，我永远是你场外最坚定的后援。</p>
+    <p>加油，雪雪！❤️</p>
+    <button id="egg-close" class="btn">收下啦 💌</button>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="app.js?v=20260927i"></script>
+<script src="app.js?v=20260927j"></script>
 </body>
 </html>
