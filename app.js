@@ -100,7 +100,7 @@ async function loadJobs() {
   var region = document.getElementById('filter-region').value;
   var target = document.getElementById('filter-target').value;
   try {
-    var q = sb.from('jobs').select('*').eq('is_active', true).order('discovered_at', { ascending: false }).limit(500);
+    var q = sb.from('jobs').select('*').eq('is_active', true).order('posted_at', { ascending: false, nullsFirst: false }).order('discovered_at', { ascending: false }).limit(500);
     if (region) q = q.eq('region', region);
     if (target) q = q.eq('target', target);
     var res = await q;
