@@ -98,9 +98,11 @@ async function loadJobs() {
   boxI.innerHTML = loadingHTML();
   boxF.innerHTML = loadingHTML();
   var region = document.getElementById('filter-region').value;
+  var target = document.getElementById('filter-target').value;
   try {
     var q = sb.from('jobs').select('*').eq('is_active', true).order('discovered_at', { ascending: false }).limit(500);
     if (region) q = q.eq('region', region);
+    if (target) q = q.eq('target', target);
     var res = await q;
     if (res.error) throw res.error;
     JOB_ROWS = res.data || [];
@@ -148,6 +150,7 @@ async function addAppFromJob(jobId) {
   }
 }
 document.getElementById('filter-region').addEventListener('change', loadJobs);
+document.getElementById('filter-target').addEventListener('change', loadJobs);
 document.getElementById('jobs-refresh').addEventListener('click', loadJobs);
 document.getElementById('jobs-more').addEventListener('click', function () {
   JOB_LIMIT += 40;
