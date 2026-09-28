@@ -565,3 +565,19 @@ loadResumeResults();
   document.getElementById('egg-close').addEventListener('click', function () { ov.classList.remove('show'); });
   ov.addEventListener('click', function (e) { if (e.target === ov) ov.classList.remove('show'); });
 })();
+
+// 手机端业界/教职快捷切换
+(function () {
+  var cols = document.querySelector('.jobs-cols');
+  var bar = document.querySelector('.jobs-switch');
+  var btns = document.querySelectorAll('[data-jobs-switch]');
+  if (!cols || !bar || !btns.length) return;
+  btns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      btns.forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      cols.setAttribute('data-active-col', b.dataset.jobsSwitch);
+      bar.scrollIntoView({ block: 'start' });
+    });
+  });
+})();
