@@ -31,11 +31,43 @@
       </select>
       <button id="jobs-refresh" class="btn small">重新加载</button>
     </div>
-    <details class="legend">
-      <summary>签证标签说明</summary>
-      <p><span class="tag sp-sponsor">办签证 Sponsor</span> 招聘帖明确写了提供 sponsorship（如 H-1B）。</p>
-      <p><span class="tag sp-verified">有H-1B记录</span> 招聘帖没写，但在 H-1B 公开数据（DOL LCA）里查到该雇主历史上办过 H-1B——代表"办过"，不保证这个岗位一定办，投递前请和 HR 确认。</p>
-      <p><span class="tag sp-no">不办签证</span> 招聘帖明确写了不办，或没写且在公开数据里查不到该雇主的 H-1B 记录。</p>
+    <details class="cabinet">
+      <summary>数据说明 · 目标清单与标签</summary>
+      <p class="cab-note">签证标签只看招聘帖原文 + 公开 H-1B 数据：<span class="tag sp-sponsor">办签证 Sponsor</span> 原帖明确写提供 sponsorship；<span class="tag sp-verified">有H-1B记录</span> 原帖没写但该雇主历史办过 H-1B；<span class="tag sp-no">不办签证</span> 原帖明确不办或查不到记录。不保证具体岗位一定办，投递前请和 HR 确认。</p>
+      <div class="cab-lists">
+        <div class="cab-col">
+          <h4>目标公司清单（261 家）</h4>
+          <div class="cab-scroll">
+<p class="cab-g"><strong>综合大行 / 商业银行</strong>（29）<br>JPMorgan Chase, Goldman Sachs, Morgan Stanley, Bank of America, Citigroup, Wells Fargo, Deutsche Bank, Barclays, UBS, BNP Paribas, Societe Generale, HSBC, Mizuho, MUFG, SMBC, RBC, TD Bank, BMO, Scotiabank, Standard Chartered, Nomura, Santander, BBVA, ING, Natixis, Rabobank, UniCredit, Intesa Sanpaolo, Credit Agricole</p>
+<p class="cab-g"><strong>投行 / 精品投行</strong>（23）<br>Jefferies, Evercore, Lazard, Moelis, Centerview Partners, PJT Partners, Perella Weinberg, Greenhill, Rothschild &amp; Co, Houlihan Lokey, Piper Sandler, Raymond James, Stifel, William Blair, KBW, Macquarie, TD Cowen, BTIG, Cantor Fitzgerald, Oppenheimer, Stephens, Harris Williams, Lincoln International</p>
+<p class="cab-g"><strong>高频 / 自营交易</strong>（25）<br>Citadel Securities, Jane Street, Hudson River Trading, Tower Research Capital, IMC, Optiver, Susquehanna International Group, DRW, Jump Trading, Five Rings, Akuna Capital, Belvedere Trading, Chicago Trading Company, Geneva Trading, Old Mission Capital, TransMarket Group, Virtu Financial, GTS, Flow Traders, Headlands Technologies, Maven Securities, Tibra, Eclipse Trading, XTX Markets, Qube Research &amp; Technologies</p>
+<p class="cab-g"><strong>对冲基金</strong>（38）<br>Citadel, Bridgewater Associates, Two Sigma, D.E. Shaw, Renaissance Technologies, Millennium Management, Point72, Balyasny Asset Management, ExodusPoint Capital, Schonfeld Strategic Advisors, Verition Fund Management, Walleye Capital, Engineers Gate, Voleon, WorldQuant, PDT Partners, AQR Capital Management, Man Group, Winton Group, Aspect Capital, Marshall Wace, Brevan Howard, Rokos Capital, BlueCrest Capital Management, Caxton Associates, Tudor Investment Corporation, Moore Capital Management, Viking Global Investors, Tiger Global Management, Coatue Management, D1 Capital Partners, Lone Pine Capital, Pershing Square Capital Management, Elliott Management, Baupost Group, Farallon Capital Management, Davidson Kempner, Sculptor Capital Management</p>
+<p class="cab-g"><strong>资管</strong>（16）<br>BlackRock, Vanguard, Fidelity Investments, State Street Global Advisors, PIMCO, Wellington Management, T. Rowe Price, Capital Group, Invesco, Franklin Templeton, AllianceBernstein, Neuberger Berman, Nuveen, PGIM, MetLife Investment Management, Barings</p>
+<p class="cab-g"><strong>私募 / 另类</strong>（25）<br>Blackstone, KKR, Apollo Global Management, Carlyle Group, TPG, Warburg Pincus, Bain Capital, Advent International, CVC Capital Partners, EQT, Clayton Dubilier &amp; Rice, Hellman &amp; Friedman, Silver Lake, Thoma Bravo, Vista Equity Partners, Insight Partners, General Atlantic, TA Associates, Summit Partners, GTCR, Ares Management, Oaktree Capital Management, Blue Owl Capital, HPS Investment Partners, Sixth Street</p>
+<p class="cab-g"><strong>金融科技 / 市场基础设施</strong>（26）<br>Stripe, Block, Plaid, Brex, Ramp, Chime, SoFi, Coinbase, Kraken, Ripple, Chainalysis, Bloomberg LP, FactSet, S&amp;P Global, MSCI, Intercontinental Exchange, Nasdaq, CME Group, LSEG, DTCC, OCC, IEX Exchange, MEMX, Cboe Global Markets, Tradeweb, MarketAxess</p>
+<p class="cab-g"><strong>保险</strong>（7）<br>MetLife, Prudential Financial, New York Life, MassMutual, TIAA, AIG, Guardian Life</p>
+<p class="cab-g"><strong>区域银行（纽约都会区 + 北卡）</strong>（18）<br>PNC Financial, Citizens Financial, KeyCorp, M&amp;T Bank, Truist, Fifth Third Bank, Regions Financial, Ally Financial, Synchrony Financial, Discover Financial, Capital One, First Citizens Bank, Webster Bank, Valley National Bank, Apple Bank, Amalgamated Bank, Popular Bank, Flushing Bank</p>
+<p class="cab-g"><strong>科技大厂（金融/数据岗）</strong>（5）<br>Google, Meta, Amazon, Microsoft, Palantir</p>
+<p class="cab-g"><strong>咨询 / 四大（量化风控岗）</strong>（6）<br>Deloitte, PwC, EY, KPMG, McKinsey, Oliver Wyman</p>
+<p class="cab-g"><strong>制药 / 生物统计</strong>（20）<br>Pfizer, Merck, Johnson &amp; Johnson, Bristol Myers Squibb, Regeneron, Moderna, Eli Lilly, Novartis, Roche, Amgen, GSK, AstraZeneca, Sanofi, Biogen, Vertex Pharmaceuticals, Gilead Sciences, Novo Nordisk, AbbVie, Bayer, Takeda</p>
+<p class="cab-g"><strong>CRO / 医药研发外包</strong>（7）<br>IQVIA, Thermo Fisher Scientific, Labcorp, Syneos Health, Fortrea, Medpace, ICON plc</p>
+<p class="cab-g"><strong>统计 / 调研 / 研究机构</strong>（16）<br>SAS Institute, RTI International, Nielsen, Ipsos, Kantar, Dun &amp; Bradstreet, Equifax, Experian, TransUnion, FICO, RAND Corporation, Mathematica, Urban Institute, NORC at the University of Chicago, Westat, Abt Associates</p>
+          </div>
+        </div>
+        <div class="cab-col">
+          <h4>目标大学清单（66 所）</h4>
+          <div class="cab-scroll">
+<p class="cab-g"><strong>曼哈顿</strong>（18）<br>Columbia University, New York University, Cornell Tech, Rockefeller University, CUNY Baruch College, CUNY Hunter College, CUNY City College, CUNY Brooklyn College, CUNY Queens College, CUNY Graduate Center, CUNY John Jay College, CUNY Lehman College, CUNY College of Staten Island, Fordham University, The New School, Pace University, St. John&#x27;s University, Yeshiva University</p>
+<p class="cab-g"><strong>布鲁克林 / 皇后区 / 布朗克斯</strong>（3）<br>NYU Tandon School of Engineering, Pratt Institute, Long Island University Brooklyn</p>
+<p class="cab-g"><strong>长岛</strong>（6）<br>Stony Brook University, Hofstra University, Adelphi University, Farmingdale State College, Nassau Community College, Suffolk County Community College</p>
+<p class="cab-g"><strong>威彻斯特 / 哈德逊谷</strong>（7）<br>Iona University, Manhattanville University, Sarah Lawrence College, Purchase College SUNY, Westchester Community College, Bard College, Vassar College</p>
+<p class="cab-g"><strong>新泽西</strong>（16）<br>Princeton University, Rutgers University New Brunswick, Rutgers Business School Newark, New Jersey Institute of Technology, Stevens Institute of Technology, Seton Hall University, Montclair State University, William Paterson University, Kean University, Fairleigh Dickinson University, Drew University, New Jersey City University, Bergen Community College, Hudson County Community College, Essex County College, Middlesex College</p>
+<p class="cab-g"><strong>康州</strong>（12）<br>Yale University, University of Connecticut, UConn Stamford, Fairfield University, Quinnipiac University, Wesleyan University, Trinity College, Sacred Heart University, University of New Haven, Central Connecticut State University, Norwalk Community College, Housatonic Community College</p>
+<p class="cab-g"><strong>北卡</strong>（4）<br>Duke University, University of North Carolina at Chapel Hill, North Carolina State University, Wake Forest University</p>
+          </div>
+        </div>
+      </div>
+      <p class="cab-note">每天 9:00 / 17:00 自动轮查清单中的一部分 + 关键词搜索兜底；新岗位入库后自动显示在上方，过期会自动下架。</p>
     </details>
     <div class="jobs-cols">
       <div class="jobs-col">
@@ -142,6 +174,6 @@
 <div id="toast" class="toast"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="app.js?v=20260927g"></script>
+<script src="app.js?v=20260927h"></script>
 </body>
 </html>
