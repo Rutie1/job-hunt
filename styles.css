@@ -311,3 +311,13 @@ details summary { cursor: pointer; font-size: 14px; color: #2456d6; margin: 8px 
 .egg-card h3 { margin: 10px 0 12px; font-size: 20px; color: #d4695e; }
 .egg-card p { line-height: 1.9; font-size: 15px; margin: 0 0 10px; }
 .egg-card .btn { margin-top: 10px; }
+
+/* 手机端业界/教职快捷切换 */
+.jobs-switch { display: none; }
+@media (max-width: 640px) {
+  .jobs-switch { display: flex; position: sticky; top: 8px; z-index: 60; background: var(--card); border: 1px solid var(--border); border-radius: 999px; padding: 4px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+  .jobs-switch button { flex: 1; border: 0; background: transparent; border-radius: 999px; padding: 10px 0; font-size: 15px; font-weight: 700; color: var(--muted); cursor: pointer; }
+  .jobs-switch button.active { background: #2563eb; color: #fff; }
+  .jobs-cols[data-active-col="industry"] .jobs-col[data-jobs-col="faculty"] { display: none; }
+  .jobs-cols[data-active-col="faculty"] .jobs-col[data-jobs-col="industry"] { display: none; }
+}
