@@ -300,3 +300,14 @@ details summary { cursor: pointer; font-size: 14px; color: #2456d6; margin: 8px 
 .cab-g { margin: 0 0 10px; line-height: 1.7; }
 .cab-g strong { color: var(--text); }
 @media (max-width: 640px) { .cab-lists { flex-direction: column; } }
+
+/* 隐藏彩蛋弹窗 */
+#easter-egg-title { user-select: none; }
+.egg-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 999; padding: 20px; }
+.egg-overlay.show { display: flex; }
+.egg-card { max-width: 430px; background: linear-gradient(160deg, #fff8f1, #ffeef3); border-radius: 20px; padding: 28px 26px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.25); animation: eggPop .35s ease; color: #5b4a42; }
+@keyframes eggPop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.egg-card .egg-emoji { font-size: 44px; }
+.egg-card h3 { margin: 10px 0 12px; font-size: 20px; color: #d4695e; }
+.egg-card p { line-height: 1.9; font-size: 15px; margin: 0 0 10px; }
+.egg-card .btn { margin-top: 10px; }
