@@ -46,7 +46,12 @@ function loadingHTML() { return '<div class="loading">加载中…</div>'; }
 function emptyHTML(text) { return '<div class="empty">' + esc(text) + '</div>'; }
 function fmtDate(d) {
   if (!d) return '';
-  return String(d).slice(0, 10);
+  // 数据库存的是 UTC 时间戳，按美东时区显示日期（直接截字符串会差一天）
+  try {
+    return new Date(d).toLocaleDateString('en-CA', { timeZone: 'America/New_York' });
+  } catch (e) {
+    return String(d).slice(0, 10);
+  }
 }
 function fmtDateTime(d) {
   if (!d) return '';
@@ -78,7 +83,7 @@ function jobCard(j) {
     '<h3>' + esc(j.title) + '</h3>' +
     '<div class="meta">' + esc(j.company || '') +
       (j.location ? ' · ' + esc(j.location) : '') +
-      (j.posted_at ? ' · 发布于 ' + esc(String(j.posted_at).slice(0, 10)) : '') + '</div>' +
+      (j.posted_at ? ' · 发布于 ' + esc(fmtDate(j.posted_at)) : '') + '</div>' +
     '<div style="margin-top:6px;">' +
       (j.region ? '<span class="tag region-' + esc(j.region) + '">' + esc(REGION_LABEL[j.region] || j.region) + '</span>' : '') +
       (j.category && j.category !== 'faculty' ? '<span class="tag">' + esc(CATEGORY_LABEL[j.category] || j.category) + '</span>' : '') +
