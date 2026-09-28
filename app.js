@@ -78,7 +78,7 @@ function jobCard(j) {
     '<h3>' + esc(j.title) + '</h3>' +
     '<div class="meta">' + esc(j.company || '') +
       (j.location ? ' · ' + esc(j.location) : '') +
-      (j.posted_text ? ' · 发布于 ' + esc(j.posted_text) : '') + '</div>' +
+      (j.posted_at ? ' · 发布于 ' + esc(String(j.posted_at).slice(0, 10)) : '') + '</div>' +
     '<div style="margin-top:6px;">' +
       (j.region ? '<span class="tag region-' + esc(j.region) + '">' + esc(REGION_LABEL[j.region] || j.region) + '</span>' : '') +
       (j.category && j.category !== 'faculty' ? '<span class="tag">' + esc(CATEGORY_LABEL[j.category] || j.category) + '</span>' : '') +
