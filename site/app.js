@@ -162,7 +162,7 @@ function renderJobs() {
   var boxF = document.getElementById('jobs-faculty');
   var ind = sortJobs(JOB_ROWS.filter(function (j) { return j.category !== 'faculty'; }));
   var fac = sortJobs(JOB_ROWS.filter(function (j) { return j.category === 'faculty'; }));
-  boxI.innerHTML = ind.length ? ind.slice(0, JOB_LIMIT).map(jobCard).join('') : emptyHTML('暂无业界岗位，下一轮自动更新（每天 9:00 / 17:00）后会显示在这里。');
+  boxI.innerHTML = ind.length ? ind.slice(0, JOB_LIMIT).map(jobCard).join('') : emptyHTML('暂无业界岗位，每天 17:00 自动更新后会显示在这里。');
   boxF.innerHTML = fac.length ? fac.slice(0, JOB_LIMIT).map(jobCard).join('') : emptyHTML('暂无教职岗位，下一轮自动更新后会显示在这里。');
   [boxI, boxF].forEach(function (box) {
     box.querySelectorAll('[data-add-app]').forEach(function (b) {
