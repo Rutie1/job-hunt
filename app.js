@@ -65,6 +65,16 @@ function todayStr() {
   var p = function (x) { return (x < 10 ? '0' : '') + x; };
   return n.getFullYear() + '-' + p(n.getMonth() + 1) + '-' + p(n.getDate());
 }
+// deadline（YYYY-MM-DD）距离今天还有几天；null 表示无截止日期
+function daysUntil(dateStr) {
+  if (!dateStr) return null;
+  var m = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return null;
+  var target = new Date(+m[1], +m[2] - 1, +m[3]);
+  var now = new Date();
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((target - today) / 86400000);
+}
 
 /* ---------- tab 切换 ---------- */
 document.querySelectorAll('.tabbar button').forEach(function (btn) {
@@ -79,12 +89,23 @@ document.querySelectorAll('.tabbar button').forEach(function (btn) {
 
 /* ================= 岗位（业界 / 教职双列） ================= */
 function jobCard(j) {
-  return '<div class="card">' +
+  var due = daysUntil(j.deadline);
+  var urgent = due !== null && due >= 0 && due <= 30;
+  var veryUrgent = due !== null && due >= 0 && due <= 7;
+  var expired = due !== null && due < 0;
+  var rec = !!j.is_recommended;
+  var cls = 'card' + (urgent ? ' card-urgent' : '') + (rec ? ' card-rec' : '');
+  var badges = '';
+  if (veryUrgent) badges += '<span class="tag tag-deadline-hot">🔴 还有' + due + '天截止</span>';
+  else if (urgent) badges += '<span class="tag tag-deadline">⏳ 还有' + due + '天截止</span>';
+  else if (expired) badges += '<span class="tag tag-expired">已过截止日期</span>';
+  if (rec) badges += '<span class="tag tag-rec">⭐ 推荐投递</span>';
+  return '<div class="' + cls + '">' +
     '<h3>' + esc(j.title) + '</h3>' +
     '<div class="meta">' + esc(j.company || '') +
       (j.location ? ' · ' + esc(j.location) : '') +
       (j.posted_at ? ' · 发布于 ' + esc(fmtDate(j.posted_at)) : '') + '</div>' +
-    '<div style="margin-top:6px;">' +
+    '<div style="margin-top:6px;">' + badges +
       (j.region ? '<span class="tag region-' + esc(j.region) + '">' + esc(REGION_LABEL[j.region] || j.region) + '</span>' : '') +
       (j.category && j.category !== 'faculty' ? '<span class="tag">' + esc(CATEGORY_LABEL[j.category] || j.category) + '</span>' : '') +
       (j.sponsorship ? '<span class="tag sp-' + esc(j.sponsorship) + '">' + esc(SPONSOR_LABEL[j.sponsorship] || j.sponsorship) + '</span>' : '') +
@@ -93,7 +114,7 @@ function jobCard(j) {
     '<div class="actions">' +
       (j.url ? '<a class="link-btn" href="' + esc(j.url) + '" target="_blank" rel="noopener">查看详情 / 申请</a>' : '') +
       '<button class="btn small" data-add-app="' + esc(j.id) + '">加入投递</button>' +
-      '<button class="btn small" data-match-job="' + esc(j.id) + '">简历匹配</button>' +
+      '<button class="btn small" data-match-job="' + esc(j.id) + '" data-match-cat="' + esc(j.category || '') + '">简历匹配</button>' +
     '</div>' +
   '</div>';
 }
@@ -120,19 +141,35 @@ async function loadJobs() {
 }
 var JOB_ROWS = [];
 var JOB_LIMIT = 40;
+// 排序：30天内截止的置顶（按截止日从近到远）> 推荐投递 > 发布时间从新到旧
+function sortJobs(rows) {
+  function dueOf(j) { return daysUntil(j.deadline); }
+  return rows.slice().sort(function (a, b) {
+    var da = dueOf(a), db = dueOf(b);
+    var ua = da !== null && da >= 0 && da <= 30, ub = db !== null && db >= 0 && db <= 30;
+    if (ua !== ub) return ua ? -1 : 1;
+    if (ua && ub && da !== db) return da - db;
+    var ra = !!a.is_recommended, rb = !!b.is_recommended;
+    if (ra !== rb) return ra ? -1 : 1;
+    var pa = a.posted_at || '', pb = b.posted_at || '';
+    if (pa !== pb) return pa < pb ? 1 : -1;
+    var xa = a.discovered_at || '', xb = b.discovered_at || '';
+    return xa < xb ? 1 : -1;
+  });
+}
 function renderJobs() {
   var boxI = document.getElementById('jobs-industry');
   var boxF = document.getElementById('jobs-faculty');
-  var ind = JOB_ROWS.filter(function (j) { return j.category !== 'faculty'; });
-  var fac = JOB_ROWS.filter(function (j) { return j.category === 'faculty'; });
-  boxI.innerHTML = ind.length ? ind.slice(0, JOB_LIMIT).map(jobCard).join('') : emptyHTML('暂无业界岗位，下一轮自动更新（每天 9:00 / 17:00）后会显示在这里。');
+  var ind = sortJobs(JOB_ROWS.filter(function (j) { return j.category !== 'faculty'; }));
+  var fac = sortJobs(JOB_ROWS.filter(function (j) { return j.category === 'faculty'; }));
+  boxI.innerHTML = ind.length ? ind.slice(0, JOB_LIMIT).map(jobCard).join('') : emptyHTML('暂无业界岗位，每天 17:00 自动更新后会显示在这里。');
   boxF.innerHTML = fac.length ? fac.slice(0, JOB_LIMIT).map(jobCard).join('') : emptyHTML('暂无教职岗位，下一轮自动更新后会显示在这里。');
   [boxI, boxF].forEach(function (box) {
     box.querySelectorAll('[data-add-app]').forEach(function (b) {
       b.addEventListener('click', function () { addAppFromJob(b.dataset.addApp); });
     });
     box.querySelectorAll('[data-match-job]').forEach(function (b) {
-      b.addEventListener('click', function () { requestMatch(b.dataset.matchJob); });
+      b.addEventListener('click', function () { requestMatch(b.dataset.matchJob, b.dataset.matchCat); });
     });
   });
   var more = document.getElementById('jobs-more');
@@ -395,18 +432,41 @@ async function extractTextFromFile(file) {
   return await file.text();
 }
 
-async function loadResumeMaster() {
-  var box = document.getElementById('resume-master');
+var RESUME_TYPE_LABEL = { industry: '业界', faculty: '教职' };
+function resumeTypeOf(r) { return (r && r.resume_type) || 'industry'; }
+
+async function loadResumeMasters() {
+  var defs = [
+    { type: 'industry', box: 'resume-master-industry', empty: '还没有上传业界简历。' },
+    { type: 'faculty', box: 'resume-master-faculty', empty: '还没有上传教职简历。' }
+  ];
   try {
-    var r = await sb.from('resumes').select('id,title,file_name,content_text,created_at').eq('is_master', true).order('created_at', { ascending: false }).limit(1);
+    var r = await sb.from('resumes').select('*').eq('is_master', true).order('created_at', { ascending: false });
     if (r.error) throw r.error;
-    if (!r.data.length) { box.innerHTML = '<div class="hint">还没有上传简历。</div>'; return; }
-    var m = r.data[0];
-    var words = m.content_text.trim().split(/\s+/).length;
-    box.innerHTML = '<div class="card"><h3>' + esc(m.title) + '</h3>' +
-      '<div class="meta">' + esc(m.file_name || '') + ' · 约 ' + words + ' 词 · ' + esc(fmtDateTime(m.created_at)) + '</div>' +
-      '<pre class="note-content">' + esc(m.content_text.slice(0, 600)) + (m.content_text.length > 600 ? '\n…' : '') + '</pre></div>';
-  } catch (e) { box.innerHTML = emptyHTML('加载失败：' + e.message); }
+    var rows = r.data || [];
+    defs.forEach(function (d) {
+      var box = document.getElementById(d.box);
+      if (!box) return;
+      var m = rows.filter(function (x) { return resumeTypeOf(x) === d.type; })[0];
+      if (!m) { box.innerHTML = '<div class="hint">' + d.empty + '</div>'; return; }
+      var words = m.content_text.trim().split(/\s+/).length;
+      box.innerHTML = '<div class="card"><h3>' + esc(m.title) + '</h3>' +
+        '<div class="meta">' + esc(m.file_name || '') + ' · 约 ' + words + ' 词 · ' + esc(fmtDateTime(m.created_at)) + '</div>' +
+        '<pre class="note-content">' + esc(m.content_text.slice(0, 600)) + (m.content_text.length > 600 ? '\n…' : '') + '</pre></div>';
+    });
+  } catch (e) {
+    defs.forEach(function (d) {
+      var box = document.getElementById(d.box);
+      if (box) box.innerHTML = emptyHTML('加载失败：' + e.message);
+    });
+  }
+}
+// 同类型里找主简历；wantType 缺失时按优先级 industry > 任意一份 兜底
+function pickMaster(rows, wantType) {
+  rows = rows || [];
+  return rows.filter(function (x) { return resumeTypeOf(x) === wantType; })[0] ||
+         rows.filter(function (x) { return resumeTypeOf(x) === 'industry'; })[0] ||
+         rows[0] || null;
 }
 
 async function loadMaterials() {
@@ -415,7 +475,7 @@ async function loadMaterials() {
     var r = await sb.from('materials').select('*').order('created_at', { ascending: false }).limit(50);
     if (r.error) throw r.error;
     var rows = r.data || [];
-    document.getElementById('material-update-btn').style.display = rows.length ? '' : 'none';
+    document.getElementById('material-update-wrap').style.display = rows.length ? '' : 'none';
     box.innerHTML = rows.length ? rows.map(function (m) {
       return '<label class="mat-row"><input type="checkbox" data-mat="' + esc(m.id) + '"> ' +
         '<span class="grow"><b>' + esc(m.title) + '</b> <span class="meta">' + esc(fmtDate(m.created_at)) + '</span></span>' +
@@ -433,36 +493,58 @@ async function loadMaterials() {
   } catch (e) { box.innerHTML = emptyHTML('加载失败：' + e.message); }
 }
 
-async function handleUpload(file, kind) {
+async function handleUpload(file, kind, resumeType) {
   toast('正在解析…');
   try {
     var text = await extractTextFromFile(file);
     if (!text.trim()) { toast('没解析出文字，换一份试试'); return; }
-    var name = prompt(kind === 'resume' ? '给这份简历起个名字：' : '给这份材料起个名字：', file.name.replace(/\.[^.]+$/, ''));
-    if (name === null) return;
     if (kind === 'resume') {
-      await sb.from('resumes').update({ is_master: false }).eq('is_master', true);
-      var ins = await sb.from('resumes').insert({ title: (name || '主简历'), file_name: file.name, content_text: text, is_master: true });
-      if (ins.error) throw ins.error;
-      toast('简历已上传');
-      loadResumeMaster();
+      var label = resumeType === 'faculty' ? '教职' : '业界';
+      var name = prompt('给这份' + label + '简历起个名字：', file.name.replace(/\.[^.]+$/, ''));
+      if (name === null) return;
+      // 先把同类型的旧主简历降级（resume_type 列还没建时全按业界处理）
+      var cur = await sb.from('resumes').select('*').eq('is_master', true);
+      if (cur.error) throw cur.error;
+      var ids = (cur.data || []).filter(function (x) { return resumeTypeOf(x) === resumeType; }).map(function (x) { return x.id; });
+      if (ids.length) {
+        var dem = await sb.from('resumes').update({ is_master: false }).in('id', ids);
+        if (dem.error) throw dem.error;
+      }
+      var row = { title: (name || label + '主简历'), file_name: file.name, content_text: text, is_master: true, resume_type: resumeType };
+      var ins = await sb.from('resumes').insert(row);
+      if (ins.error && /resume_type/i.test(ins.error.message || '')) {
+        if (resumeType === 'faculty') { toast('请先在 Supabase 里运行那段加 resume_type 列的 SQL，跑完再上传教职简历'); return; }
+        delete row.resume_type;
+        var ins2 = await sb.from('resumes').insert(row);
+        if (ins2.error) throw ins2.error;
+      } else if (ins.error) throw ins.error;
+      toast(label + '简历已上传');
+      loadResumeMasters();
     } else {
-      var ins2 = await sb.from('materials').insert({ title: (name || file.name), file_name: file.name, content_text: text });
-      if (ins2.error) throw ins2.error;
+      var name2 = prompt('给这份材料起个名字：', file.name.replace(/\.[^.]+$/, ''));
+      if (name2 === null) return;
+      var ins3 = await sb.from('materials').insert({ title: (name2 || file.name), file_name: file.name, content_text: text });
+      if (ins3.error) throw ins3.error;
       toast('材料已上传');
       loadMaterials();
     }
   } catch (e) { toast('失败：' + e.message); }
 }
 
-async function requestMatch(jobId) {
+async function requestMatch(jobId, cat) {
   try {
-    var r = await sb.from('resumes').select('id').eq('is_master', true).limit(1);
+    var wantType = (cat === 'faculty') ? 'faculty' : 'industry';
+    var r = await sb.from('resumes').select('*').eq('is_master', true);
     if (r.error) throw r.error;
-    if (!r.data.length) { toast('请先在"简历"页上传简历'); switchTab('tab-resume'); return; }
-    var ins = await sb.from('resume_requests').insert({ type: 'match', resume_id: r.data[0].id, job_id: jobId, status: 'pending' });
+    var rows = r.data || [];
+    if (!rows.length) { toast('请先在"简历"页上传简历'); switchTab('tab-resume'); return; }
+    var pick = pickMaster(rows, wantType);
+    var usedType = resumeTypeOf(pick);
+    var ins = await sb.from('resume_requests').insert({ type: 'match', resume_id: pick.id, job_id: jobId, status: 'pending' });
     if (ins.error) throw ins.error;
-    toast('已提交，约 20 分钟后在"简历"页查看结果');
+    var label = RESUME_TYPE_LABEL[usedType] || '业界';
+    var note = usedType !== wantType ? '（' + RESUME_TYPE_LABEL[wantType] + '简历还没上传，先用这份顶一下）' : '';
+    toast('将用' + label + '简历《' + pick.title + '》匹配' + note + '，约 20 分钟后在"简历"页查看结果');
   } catch (e) { toast('提交失败：' + e.message); }
 }
 
@@ -473,12 +555,28 @@ async function loadResumeResults() {
     var r = await sb.from('resume_results').select('*').order('created_at', { ascending: false }).limit(50);
     if (r.error) throw r.error;
     var rows = r.data || [];
-    if (!rows.length) { box.innerHTML = emptyHTML('还没有匹配结果。在"岗位"页点任意岗位的"简历匹配"即可。'); return; }
+    if (!rows.length) { box.innerHTML = emptyHTML('还没有匹配结果。在"岗位"页点任意岗位的"简历匹配"（教职岗位会自动用教职简历），约 20 分钟后结果显示在这里。'); return; }
     rows.forEach(function (x) { RESULT_CACHE[x.id] = x; });
+    // 查每条结果用的是哪份简历：resume_results.request_id -> resume_requests.resume_id -> resumes
+    var reqResume = {};
+    try {
+      var rq = await sb.from('resume_requests').select('id,resume_id').order('created_at', { ascending: false }).limit(60);
+      var rids = [];
+      (rq.data || []).forEach(function (q) {
+        reqResume[q.id] = q.resume_id;
+        if (q.resume_id && rids.indexOf(q.resume_id) < 0) rids.push(q.resume_id);
+      });
+      if (rids.length) {
+        var rr = await sb.from('resumes').select('*').in('id', rids);
+        (rr.data || []).forEach(function (s) { reqResume['r_' + s.id] = s; });
+      }
+    } catch (e2) { /* 查不到就跳过这行显示 */ }
     box.innerHTML = rows.map(function (x) {
       var head = x.job_title ? ('针对 ' + x.company + ' · ' + x.job_title) : '简历更新版';
+      var used = reqResume['r_' + reqResume[x.request_id]];
+      var usedLine = used ? '<div class="meta">使用简历：' + esc(used.title) + '（' + (RESUME_TYPE_LABEL[resumeTypeOf(used)] || '业界') + '）</div>' : '';
       return '<div class="card"><h3>' + esc(head) + '</h3>' +
-        '<div class="meta">' + esc(fmtDateTime(x.created_at)) + '</div>' +
+        '<div class="meta">' + esc(fmtDateTime(x.created_at)) + '</div>' + usedLine +
         (x.analysis ? '<div class="match"><b>匹配分析</b><pre class="note-content">' + esc(x.analysis) + '</pre></div>' : '') +
         (x.tailored_resume ? '<details><summary>查看定制版简历全文</summary><pre class="note-content">' + esc(x.tailored_resume) + '</pre></details>' : '') +
         (x.tailored_resume ? '<div class="actions">' +
@@ -519,10 +617,15 @@ async function loadResumeResults() {
   } catch (e) { box.innerHTML = emptyHTML('加载失败：' + e.message); }
 }
 
-document.getElementById('resume-upload').addEventListener('change', function (ev) {
+document.getElementById('resume-upload-industry').addEventListener('change', function (ev) {
   var f = ev.target.files[0];
   ev.target.value = '';
-  if (f) handleUpload(f, 'resume');
+  if (f) handleUpload(f, 'resume', 'industry');
+});
+document.getElementById('resume-upload-faculty').addEventListener('change', function (ev) {
+  var f = ev.target.files[0];
+  ev.target.value = '';
+  if (f) handleUpload(f, 'resume', 'faculty');
 });
 document.getElementById('material-upload').addEventListener('change', function (ev) {
   var f = ev.target.files[0];
@@ -532,17 +635,20 @@ document.getElementById('material-upload').addEventListener('change', function (
 document.getElementById('material-update-btn').addEventListener('click', async function () {
   var ids = Array.prototype.map.call(document.querySelectorAll('[data-mat]:checked'), function (c) { return c.dataset.mat; });
   if (!ids.length) { toast('请先勾选材料'); return; }
+  var wantType = (document.getElementById('material-update-type') || {}).value || 'industry';
   try {
-    var r = await sb.from('resumes').select('id').eq('is_master', true).limit(1);
+    var r = await sb.from('resumes').select('*').eq('is_master', true);
     if (r.error) throw r.error;
-    if (!r.data.length) { toast('请先上传简历'); return; }
-    var ins = await sb.from('resume_requests').insert({ type: 'update', resume_id: r.data[0].id, material_ids: ids, status: 'pending' });
+    var rows = r.data || [];
+    if (!rows.length) { toast('请先上传简历'); return; }
+    var pick = pickMaster(rows, wantType);
+    var ins = await sb.from('resume_requests').insert({ type: 'update', resume_id: pick.id, material_ids: ids, status: 'pending' });
     if (ins.error) throw ins.error;
-    toast('已提交，约 20 分钟后生成新版简历');
+    toast('已提交，约 20 分钟后生成新版' + (RESUME_TYPE_LABEL[resumeTypeOf(pick)] || '业界') + '简历');
   } catch (e) { toast('提交失败：' + e.message); }
 });
 document.getElementById('resume-refresh').addEventListener('click', function () {
-  loadResumeMaster(); loadMaterials(); loadResumeResults();
+  loadResumeMasters(); loadMaterials(); loadResumeResults();
 });
 
 
@@ -552,7 +658,7 @@ loadPlan();
 loadApps();
 loadAppOptions();
 loadInterviews();
-loadResumeMaster();
+loadResumeMasters();
 loadMaterials();
 loadResumeResults();
 
