@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>求职助手</title>
-<link rel="stylesheet" href="styles.css?v=20260928b">
+<link rel="stylesheet" href="styles.css?v=20261003a">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -147,17 +147,29 @@
   <!-- 简历 -->
   <section id="tab-resume" class="tab-panel">
     <div class="resume-block">
-      <h2>我的简历</h2>
-      <p class="hint">上传 PDF / Word / txt，浏览器里直接解析成文字保存，不上传原文件。</p>
-      <label class="btn primary file-btn">上传简历<input type="file" id="resume-upload" accept=".pdf,.docx,.txt,.md" hidden></label>
-      <div id="resume-master" style="margin-top:8px;"></div>
+      <h2>业界简历</h2>
+      <p class="hint">申请业界岗位用这份。业界岗位点"简历匹配"时会自动用它。上传 PDF / Word / txt，浏览器里直接解析成文字保存，不上传原文件。</p>
+      <label class="btn primary file-btn">上传业界简历<input type="file" id="resume-upload-industry" accept=".pdf,.docx,.txt,.md" hidden></label>
+      <div id="resume-master-industry" style="margin-top:8px;"></div>
+    </div>
+    <div class="resume-block">
+      <h2>教职简历</h2>
+      <p class="hint">申请教职岗位用这份（CV 风格）。教职岗位点"简历匹配"时会自动用它。</p>
+      <label class="btn primary file-btn">上传教职简历<input type="file" id="resume-upload-faculty" accept=".pdf,.docx,.txt,.md" hidden></label>
+      <div id="resume-master-faculty" style="margin-top:8px;"></div>
     </div>
     <div class="resume-block">
       <h2>辅助材料</h2>
       <p class="hint">新的 project、论文更新等传到这里，勾选后可一键更新简历。</p>
       <label class="btn file-btn">上传材料<input type="file" id="material-upload" accept=".pdf,.docx,.txt,.md" hidden></label>
       <div id="material-list" style="margin-top:8px;"></div>
-      <button id="material-update-btn" class="btn primary" style="display:none;margin-top:8px;">用选中材料更新简历</button>
+      <div id="material-update-wrap" style="display:none;margin-top:8px;">
+        <select id="material-update-type" aria-label="更新到哪份简历">
+          <option value="industry">更新到业界简历</option>
+          <option value="faculty">更新到教职简历</option>
+        </select>
+        <button id="material-update-btn" class="btn primary" style="margin-top:8px;">用选中材料更新简历</button>
+      </div>
     </div>
     <div class="resume-block">
       <h2>匹配结果</h2>
@@ -192,6 +204,6 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="app.js?v=20260928b"></script>
+<script src="app.js?v=20261003a"></script>
 </body>
 </html>
