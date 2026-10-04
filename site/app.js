@@ -1,7 +1,9 @@
 /* 求职助手 - Supabase 数据层 + 5 个 tab 渲染逻辑 */
 var SUPABASE_URL = 'https://arvpykrfraabwbnwlgje.supabase.co';
 var SUPABASE_KEY = 'sb_publishable_TjINRMrM7lD8E-BIcaOlRg_-gJznHwL'; // 公开钥匙，可嵌入网页
-var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+}); // 求职网站是公开匿名访问：不读写浏览器里的登录态，避免与同源其他站点的登录互相干扰
 
 var REGION_LABEL = { ny_metro: '纽约大都会', nc: '北卡', other_us: '美国其他' };
 var CATEGORY_LABEL = { quant: '量化', risk: '风险', data: '数据 / 数科', economist: '经济学家', faculty: '教职', other: '其他' };
