@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>求职助手</title>
-<link rel="stylesheet" href="styles.css?v=20260927k">
+<link rel="stylesheet" href="styles.css?v=20261003a">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header class="topbar">
   <h1 id="easter-egg-title">求职助手</h1>
-  <p class="subtitle">岗位每天 9:00 / 17:00 自动更新</p>
+  <p class="subtitle">岗位每天 17:00 自动更新</p>
 </header>
 
 <main id="app">
@@ -34,6 +34,7 @@
     <details class="cabinet">
       <summary>数据说明 · 目标清单与标签</summary>
       <p class="cab-note">签证标签只看招聘帖原文 + 公开 H-1B 数据：<span class="tag sp-sponsor">办签证 Sponsor</span> 原帖明确写提供 sponsorship；<span class="tag sp-verified">有H-1B记录</span> 原帖没写但该雇主历史办过 H-1B；<span class="tag sp-no">不办签证</span> 原帖明确不办或查不到记录。不保证具体岗位一定办，投递前请和 HR 确认。</p>
+      <p class="cab-note">醒目标记：<span class="tag tag-deadline">⏳ 还有X天截止</span> 30 天内截止的岗位会自动置顶，7 天内会变成红色；<span class="tag tag-rec">⭐ 推荐投递</span> 简历匹配度 4 星以上的岗位。</p>
       <div class="cab-lists">
         <div class="cab-col">
           <h4>目标公司清单（261 家）</h4>
@@ -67,7 +68,7 @@
           </div>
         </div>
       </div>
-      <p class="cab-note">每天 9:00 / 17:00 自动轮查清单中的一部分 + 关键词搜索兜底；新岗位入库后自动显示在上方，过期会自动下架。</p>
+      <p class="cab-note">每天 17:00 自动轮查清单中的一部分 + 关键词搜索兜底；新岗位入库后自动显示在上方，过期会自动下架。</p>
     </details>
     <div class="jobs-switch" role="tablist" aria-label="岗位类别切换">
       <button class="active" data-jobs-switch="industry">业界</button>
@@ -146,17 +147,29 @@
   <!-- 简历 -->
   <section id="tab-resume" class="tab-panel">
     <div class="resume-block">
-      <h2>我的简历</h2>
-      <p class="hint">上传 PDF / Word / txt，浏览器里直接解析成文字保存，不上传原文件。</p>
-      <label class="btn primary file-btn">上传简历<input type="file" id="resume-upload" accept=".pdf,.docx,.txt,.md" hidden></label>
-      <div id="resume-master" style="margin-top:8px;"></div>
+      <h2>业界简历</h2>
+      <p class="hint">申请业界岗位用这份。业界岗位点"简历匹配"时会自动用它。上传 PDF / Word / txt，浏览器里直接解析成文字保存，不上传原文件。</p>
+      <label class="btn primary file-btn">上传业界简历<input type="file" id="resume-upload-industry" accept=".pdf,.docx,.txt,.md" hidden></label>
+      <div id="resume-master-industry" style="margin-top:8px;"></div>
+    </div>
+    <div class="resume-block">
+      <h2>教职简历</h2>
+      <p class="hint">申请教职岗位用这份（CV 风格）。教职岗位点"简历匹配"时会自动用它。</p>
+      <label class="btn primary file-btn">上传教职简历<input type="file" id="resume-upload-faculty" accept=".pdf,.docx,.txt,.md" hidden></label>
+      <div id="resume-master-faculty" style="margin-top:8px;"></div>
     </div>
     <div class="resume-block">
       <h2>辅助材料</h2>
       <p class="hint">新的 project、论文更新等传到这里，勾选后可一键更新简历。</p>
       <label class="btn file-btn">上传材料<input type="file" id="material-upload" accept=".pdf,.docx,.txt,.md" hidden></label>
       <div id="material-list" style="margin-top:8px;"></div>
-      <button id="material-update-btn" class="btn primary" style="display:none;margin-top:8px;">用选中材料更新简历</button>
+      <div id="material-update-wrap" style="display:none;margin-top:8px;">
+        <select id="material-update-type" aria-label="更新到哪份简历">
+          <option value="industry">更新到业界简历</option>
+          <option value="faculty">更新到教职简历</option>
+        </select>
+        <button id="material-update-btn" class="btn primary" style="margin-top:8px;">用选中材料更新简历</button>
+      </div>
     </div>
     <div class="resume-block">
       <h2>匹配结果</h2>
@@ -191,6 +204,6 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="app.js?v=20260927k"></script>
+<script src="app.js?v=20261003a"></script>
 </body>
 </html>
