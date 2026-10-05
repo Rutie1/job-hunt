@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>求职助手</title>
-<link rel="stylesheet" href="styles.css?v=20261004b">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=20261005a">
 <script src="vendor/supabase-js-2.117.2.min.js"></script>
 </head>
 <body>
@@ -16,6 +19,7 @@
 <main id="app">
   <!-- 岗位 -->
   <section id="tab-jobs" class="tab-panel active">
+    <div class="stat-strip" id="jobs-stats"></div>
     <div class="filters">
       <select id="filter-region" aria-label="地区筛选">
         <option value="">全部地区</option>
@@ -204,6 +208,6 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="app.js?v=20261004c"></script>
+<script src="app.js?v=20261005a"></script>
 </body>
 </html>

@@ -143,6 +143,27 @@ async function loadJobs() {
 }
 var JOB_ROWS = [];
 var JOB_LIMIT = 40;
+function jstat(k, v, cls) {
+  return '<div class="jstat"><div class="k">' + esc(k) + '</div><div class="v num ' + (cls || '') + '">' + v + '</div></div>';
+}
+function renderJobStats() {
+  var box = document.getElementById('jobs-stats');
+  if (!box) return;
+  var weekAgo = Date.now() - 7 * 86400000;
+  var fresh = 0, urgent = 0, rec = 0;
+  JOB_ROWS.forEach(function (j) {
+    var d = j.posted_at || j.discovered_at;
+    if (d && new Date(d).getTime() >= weekAgo) fresh++;
+    var du = daysUntil(j.deadline);
+    if (du !== null && du >= 0 && du <= 30) urgent++;
+    if (j.is_recommended) rec++;
+  });
+  box.innerHTML =
+    jstat('在招岗位', JOB_ROWS.length, 'c-brand') +
+    jstat('本周新增', fresh, 'c-ok') +
+    jstat('临近截止', urgent, 'c-danger') +
+    jstat('推荐投递', rec, 'c-gold');
+}
 // 排序：30天内截止的置顶（按截止日从近到远）> 推荐投递 > 发布时间从新到旧
 function sortJobs(rows) {
   function dueOf(j) { return daysUntil(j.deadline); }
@@ -166,6 +187,7 @@ function renderJobs() {
   var fac = sortJobs(JOB_ROWS.filter(function (j) { return j.category === 'faculty'; }));
   boxI.innerHTML = ind.length ? ind.slice(0, JOB_LIMIT).map(jobCard).join('') : emptyHTML('暂无业界岗位，每天 17:00 自动更新后会显示在这里。');
   boxF.innerHTML = fac.length ? fac.slice(0, JOB_LIMIT).map(jobCard).join('') : emptyHTML('暂无教职岗位，下一轮自动更新后会显示在这里。');
+  renderJobStats();
   [boxI, boxF].forEach(function (box) {
     box.querySelectorAll('[data-add-app]').forEach(function (b) {
       b.addEventListener('click', function () { addAppFromJob(b.dataset.addApp); });
